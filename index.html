@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>I²TMS - Intelligent Traffic Management System</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #080a0f;
+    color: #f4f7fb;
+    min-height: 100vh;
+}
+
+.app {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* SIDEBAR */
+
+.sidebar {
+    width: 220px;
+    background: #0d1016;
+    border-right: 1px solid #222833;
+    padding: 25px 15px;
+    position: fixed;
+    height: 100vh;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.logo span {
+    color: #00e5a0;
+}
+
+.location {
+    color: #858c99;
+    font-size: 12px;
+    margin-bottom: 35px;
+}
+
+.nav button {
+    width: 100%;
+    background: transparent;
+    color: #9ba3b0;
+    border: none;
+    padding: 14px;
+    margin-bottom: 8px;
+    text-align: left;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.nav button:hover,
+.nav button.active {
+    background: #1769e0;
+    color: white;
+}
+
+.live-box {
+    position: absolute;
+    bottom: 30px;
+    left: 20px;
+    right: 20px;
+    background: #151a22;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 12px;
+}
+
+.green-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #00e5a0;
+    border-radius: 50%;
+    margin-right: 6px;
+}
+
+/* MAIN */
+
+.main {
+    margin-left: 220px;
+    width: calc(100% - 220px);
+    padding: 28px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.header h1 {
+    font-size: 25px;
+}
+
+.header p {
+    color: #777f8c;
+    margin-top: 5px;
+    font-size: 13px;
+}
+
+.status {
+    background: #10261f;
+    color: #00e5a0;
+    padding: 10px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    border: 1px solid #164d3c;
+}
+
+/* CARDS */
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 18px;
+}
+
+.card {
+    background: #10141b;
+    border: 1px solid #202630;
+    border-radius: 12px;
+    padding: 18px;
+}
+
+.card-title {
+    color: #858d9b;
+    font-size: 11px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+
+.big-number {
+    font-size: 29px;
+    font-weight: bold;
+}
+
+.green {
+    color: #00e5a0;
+}
+
+.yellow {
+    color: #ffc857;
+}
+
+.red {
+    color: #ff4d5a;
+}
+
+.blue {
+    color: #5ba7ff;
+}
+
+/* GRID */
+
+.dashboard {
+    display: grid;
+    grid-template-columns: 240px 1fr 260px;
+    gap: 15px;
+}
+
+/* JUNCTIONS */
+
+.panel {
+    background: #10141b;
+    border: 1px solid #202630;
+    border-radius: 12px;
+    padding: 18px;
+}
+
+.panel h2 {
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+.junction {
+    background: #151a22;
+    border: 1px solid transparent;
+    padding: 14px;
+    border-radius: 9px;
+    margin-bottom: 9px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.junction:hover {
+    border-color: #1769e0;
+}
+
+.junction.selected {
+    border-color: #5ba7ff;
+    background: #17202c;
+}
+
+.junction-name {
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.junction-info {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    color: #858d9b;
+    font-size: 11px;
+}
+
+.badge {
+    padding: 4px 7px;
+    border-radius: 5px;
+    font-size: 9px;
+    font-weight: bold;
+}
+
+.badge.high {
+    color: #ff5b65;
+    background: #35171b;
+}
+
+.badge.medium {
+    color: #ffc857;
+    background: #352b13;
+}
+
+.badge.low {
+    color: #00e5a0;
+    background: #102b23;
+}
+
+/* DETAILS */
+
+.detail-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.signal {
+    padding: 8px 12px;
+    border-radius: 20px;
+    color: #00e5a0;
+    background: #102b23;
+    font-size: 11px;
+}
+
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: 25px;
+    gap: 10px;
+}
+
+.metric {
+    background: #151a22;
+    padding: 18px;
+    border-radius: 9px;
+}
+
+.metric small {
+    color: #777f8c;
+    font-size: 10px;
+}
+
+.metric strong {
+    display: block;
+    font-size: 26px;
+    margin-top: 8px;
+}
+
+/* AI */
+
+.ai-panel {
+    background: linear-gradient(145deg, #171421, #10141b);
+}
+
+.ai-title {
+    color: #c49aff;
+}
+
+.ai-data {
+    display: flex;
+    justify-content: space-between;
+    margin: 18px 0;
+}
+
+.ai-data span {
+    color: #858d9b;
+    font-size: 11px;
+}
+
+.ai-data strong {
+    display: block;
+    margin-top: 6px;
+    font-size: 20px;
+}
+
+.ai-arrow {
+    text-align: center;
+    color: #c49aff;
+    font-size: 20px;
+}
+
+button.action {
+    width: 100%;
+    border: none;
+    padding: 13px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    background: #b994ff;
+    color: #15101f;
+}
+
+button.action:hover {
+    background: #cdb4ff;
+}
+
+button.red-button {
+    background: #ff4d5a;
+    color: white;
+}
+
+button.dark-button {
+    background: #222a35;
+    color: white;
+}
+
+/* CCTV */
+
+.bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 260px;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.cctv {
+    height: 225px;
+    border-radius: 9px;
+    background:
+        linear-gradient(rgba(10,15,20,.25),rgba(10,15,20,.7)),
+        radial-gradient(circle at 50% 55%, #344c4a 0 5%, transparent 6%),
+        linear-gradient(120deg,#26332e,#172326 45%,#303938);
+    position: relative;
+    overflow: hidden;
+}
+
+.cctv::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 35px;
+    height: 2px;
+    background: rgba(255,255,255,.35);
+    transform: rotate(-8deg);
+}
+
+.cctv-label {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(0,0,0,.65);
+    padding: 8px;
+    border-radius: 5px;
+    font-size: 11px;
+}
+
+.cctv-live {
+    color: #ff4d5a;
+}
+
+.cctv button {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    padding: 11px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #ff4d5a;
+    color: white;
+    font-weight: bold;
+}
+
+/* ANALYTICS */
+
+.bar {
+    margin: 12px 0;
+}
+
+.bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #9ba3b0;
+}
+
+.bar-bg {
+    background: #222832;
+    height: 7px;
+    border-radius: 10px;
+    margin-top: 6px;
+}
+
+.bar-fill {
+    height: 100%;
+    border-radius: 10px;
+    background: #1769e0;
+}
+
+.impact {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #252b34;
+}
+
+.impact h3 {
+    color: #00e5a0;
+    font-size: 25px;
+    margin-top: 8px;
+}
+
+/* MODAL / ALERT */
+
+.alert {
+    position: fixed;
+    right: 25px;
+    bottom: 25px;
+    width: 320px;
+    background: #171b23;
+    border: 1px solid #ff4d5a;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 15px 50px rgba(0,0,0,.6);
+    display: none;
+    z-index: 10;
+}
+
+.alert.show {
+    display: block;
+    animation: slideIn .3s ease;
+}
+
+.alert h3 {
+    color: #ff4d5a;
+    margin-bottom: 12px;
+}
+
+.alert p {
+    color: #aab1bc;
+    font-size: 12px;
+    margin: 7px 0;
+}
+
+.alert button {
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.ai-success {
+    color: #00e5a0;
+    background: #102b23;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 15px;
+    display: none;
+    font-size: 12px;
+}
+
+.ai-success.show {
+    display: block;
+}
+
+@media(max-width:1000px) {
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .bottom-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats {
+        grid-template-columns: repeat(2,1fr);
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+
+    <div class="logo">
+        I<span>²</span>TMS
+    </div>
+
+    <div class="location">
+        Nagpur Smart City
+    </div>
+
+    <div class="nav">
+        <button class="active">▦ Dashboard</button>
+        <button>⚯ Junctions</button>
+        <button>⚠ Incidents</button>
+        <button>▥ Analytics</button>
+    </div>
+
+    <div class="live-box">
+        <span class="green-dot"></span>
+        SYSTEM LIVE
+    </div>
+
+</aside>
+
+
+<!-- MAIN -->
+
+<main class="main">
+
+<header class="header">
+
+    <div>
+        <h1>Intelligent Traffic Command Center</h1>
+        <p>Nagpur, India • AI-assisted traffic management</p>
+    </div>
+
+    <div class="status">
+        ● SYSTEM LIVE
+    </div>
+
+</header>
+
+
+<!-- STATS -->
+
+<section class="stats">
+
+    <div class="card">
+        <div class="card-title">Total Vehicles</div>
+        <div class="big-number" id="totalVehicles">1,248</div>
+        <div class="green">↑ 12%</div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">Active Junctions</div>
+        <div class="big-number">6</div>
+        <div style="color:#858d9b">/ 8 Total</div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">High Traffic</div>
+        <div class="big-number red">2</div>
+        <div style="color:#858d9b">Critical Junctions</div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">Active Incidents</div>
+        <div class="big-number green" id="incidentCount">0</div>
+        <div id="incidentStatus">All routes operating normally</div>
+    </div>
+
+</section>
+
+
+<!-- MAIN DASHBOARD -->
+
+<section class="dashboard">
+
+<!-- JUNCTION LIST -->
+
+<div class="panel">
+
+    <h2>Junctions</h2>
+
+    <div class="junction selected"
+         onclick="selectJunction(0,this)">
+        <div class="junction-name">Variety Chowk</div>
+        <div class="junction-info">
+            <span>184 vehicles</span>
+            <span class="badge high">HIGH</span>
+        </div>
+    </div>
+
+    <div class="junction"
+         onclick="selectJunction(1,this)">
+        <div class="junction-name">Sadar</div>
+        <div class="junction-info">
+            <span>112 vehicles</span>
+            <span class="badge medium">MEDIUM</span>
+        </div>
+    </div>
+
+    <div class="junction"
+         onclick="selectJunction(2,this)">
+        <div class="junction-name">Wardha Road</div>
+        <div class="junction-info">
+            <span>45 vehicles</span>
+            <span class="badge low">LOW</span>
+        </div>
+    </div>
+
+    <div class="junction"
+         onclick="selectJunction(3,this)">
+        <div class="junction-name">Manish Nagar</div>
+        <div class="junction-info">
+            <span>67 vehicles</span>
+            <span class="badge low">LOW</span>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- SELECTED JUNCTION -->
+
+<div class="panel">
+
+    <div class="detail-top">
+
+        <div>
+            <h2 id="junctionName">Variety Chowk</h2>
+            <small style="color:#777f8c">
+                NODE ALPHA-01
+            </small>
+        </div>
+
+        <div class="signal" id="signalStatus">
+            ● SIGNAL: GREEN
+        </div>
+
+    </div>
+
+    <div class="metrics">
+
+        <div class="metric">
+            <small>VEHICLES</small>
+            <strong id="vehicleCount">184</strong>
+            <span class="red">High</span>
+        </div>
+
+        <div class="metric">
+            <small>AVG SPEED</small>
+            <strong id="speed">18</strong>
+            <span style="color:#ffc857">km/h</span>
+        </div>
+
+        <div class="metric">
+            <small>TIME REMAINING</small>
+            <strong class="green" id="timeRemaining">32</strong>
+            <span class="green">sec</span>
+        </div>
+
+    </div>
+
+
+    <!-- AI OPTIMIZATION -->
+
+    <div class="panel ai-panel" style="margin-top:15px">
+
+        <h2 class="ai-title">
+            🤖 AI Signal Optimization
+        </h2>
+
+        <div class="ai-data">
+
+            <div>
+                <span>CURRENT GREEN</span>
+                <strong id="currentGreen">45s</strong>
+            </div>
+
+            <div class="ai-arrow">→</div>
+
+            <div>
+                <span>AI RECOMMENDED</span>
+                <strong class="green" id="recommended">72s</strong>
+            </div>
+
+        </div>
+
+        <div style="font-size:12px;color:#858d9b">
+            Estimated waiting time:
+            <strong id="waitingTime"
+                    style="color:white">
+                92 sec
+            </strong>
+        </div>
+
+        <button class="action"
+                style="margin-top:15px"
+                onclick="optimizeSignal()"
+                id="optimizeBtn">
+            ⚡ OPTIMIZE SIGNAL
+        </button>
+
+        <div class="ai-success"
+             id="aiSuccess">
+            ✓ Optimization complete!<br><br>
+            Waiting time reduced from
+            <b>92 sec → 54 sec</b><br>
+            Estimated improvement: <b>41%</b>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- EFFICIENCY -->
+
+<div class="panel">
+
+    <h2>Efficiency Impact</h2>
+
+    <div style="
+        width:150px;
+        height:150px;
+        border-radius:50%;
+        border:12px solid #1c252e;
+        border-top-color:#00e5a0;
+        border-right-color:#00e5a0;
+        margin:25px auto;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+    ">
+
+        <strong class="green"
+                style="font-size:30px">
+            41%
+        </strong>
+
+    </div>
+
+    <p style="color:#858d9b;font-size:11px">
+        AI optimization impact
+    </p>
+
+    <div class="impact">
+
+        <div class="bar">
+            <div class="bar-label">
+                <span>Before AI</span>
+                <span>92 sec</span>
+            </div>
+
+            <div class="bar-bg">
+                <div class="bar-fill"
+                     style="width:92%;background:#ff4d5a">
+                </div>
+            </div>
+        </div>
+
+        <div class="bar">
+            <div class="bar-label">
+                <span>After AI</span>
+                <span>54 sec</span>
+            </div>
+
+            <div class="bar-bg">
+                <div class="bar-fill"
+                     style="width:54%;background:#00e5a0">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- CCTV + ANALYTICS -->
+
+<section class="bottom-grid">
+    
+
+<div class="panel">
+
+    <h2>🚨 AI Incident Detection</h2>
+
+    <div class="cctv">
+
+        <div class="cctv-label">
+            <span class="cctv-live">● LIVE</span>
+            CCTV: Variety Chowk
+        </div>
+
+        <div style="
+            position:absolute;
+            bottom:12px;
+            left:12px;
+            color:#aab1bc;
+            font-size:10px;
+        ">
+            AI VISION ACTIVE • CAMERA 014
+        </div>
+
+        <button onclick="simulateIncident()">
+            ⚠ SIMULATE INCIDENT
+        </button>
+
+    </div>
+
+</div>
+
+
+<div class="panel">
+
+    <h2>Traffic Analytics</h2>
+
+    <div class="bar">
+        <div class="bar-label">
+            <span>Variety Chowk</span>
+            <span>184</span>
+        </div>
+
+        <div class="bar-bg">
+            <div class="bar-fill"
+                 style="width:90%">
+            </div>
+        </div>
+    </div>
+
+    <div class="bar">
+        <div class="bar-label">
+            <span>Sadar</span>
+            <span>112</span>
+        </div>
+
+        <div class="bar-bg">
+            <div class="bar-fill"
+                 style="width:60%">
+            </div>
+        </div>
+    </div>
+
+    <div class="bar">
+        <div class="bar-label">
+            <span>Wardha Road</span>
+            <span>45</span>
+        </div>
+
+        <div class="bar-bg">
+            <div class="bar-fill"
+                 style="width:30%">
+            </div>
+        </div>
+    </div>
+
+    <div class="impact">
+
+        <small style="color:#858d9b">
+            BEFORE AI → AFTER AI
+        </small>
+
+        <h3>41% Improvement</h3>
+
+    </div>
+
+</div>
+
+</section>
+
+</main>
+</div>
+
+
+<!-- INCIDENT ALERT -->
+
+<div class="alert" id="incidentAlert">
+
+    <h3>🚨 INCIDENT DETECTED</h3>
+
+    <p>
+        <b>Type:</b> Heavy Congestion
+    </p>
+
+    <p>
+        <b>Location:</b>
+        <span id="incidentLocation">
+            Variety Chowk
+        </span>
+    </p>
+
+    <p>
+        <b>Severity:</b>
+        <span class="red">HIGH</span>
+    </p>
+
+    <p>
+        <b>Affected Vehicles:</b> 87
+    </p>
+
+    <button
+        class="action"
+        onclick="dispatchResponse()"
+        id="dispatchBtn">
+        DISPATCH RESPONSE
+    </button>
+
+</div>
+
+
+<script>
+
+const junctionData = [
+
+    {
+        name: "Variety Chowk",
+        vehicles: 184,
+        speed: 18,
+        signal: "GREEN",
+        time: 32,
+        green: 45
+    },
+
+    {
+        name: "Sadar",
+        vehicles: 112,
+        speed: 32,
+        signal: "RED",
+        time: 18,
+        green: 40
+    },
+
+    {
+        name: "Wardha Road",
+        vehicles: 45,
+        speed: 42,
+        signal: "GREEN",
+        time: 25,
+        green: 35
+    },
+
+    {
+        name: "Manish Nagar",
+        vehicles: 67,
+        speed: 28,
+        signal: "RED",
+        time: 20,
+        green: 50
+    }
+
+];
+
+let selectedIndex = 0;
+
+
+/* FEATURE 1
+   JUNCTION SELECTION
+*/
+
+function selectJunction(index, element) {
+
+    selectedIndex = index;
+
+    const data = junctionData[index];
+
+    document.querySelectorAll(".junction")
+        .forEach(j => j.classList.remove("selected"));
+
+    element.classList.add("selected");
+
+    document.getElementById("junctionName")
+        .innerText = data.name;
+
+    document.getElementById("vehicleCount")
+        .innerText = data.vehicles;
+
+    document.getElementById("speed")
+        .innerText = data.speed;
+
+    document.getElementById("timeRemaining")
+        .innerText = data.time;
+
+    document.getElementById("currentGreen")
+        .innerText = data.green + "s";
+
+    document.getElementById("incidentLocation")
+        .innerText = data.name;
+
+    /* Reset AI result when changing junction */
+
+    document.getElementById("aiSuccess")
+        .classList.remove("show");
+
+    document.getElementById("optimizeBtn")
+        .innerText = "⚡ OPTIMIZE SIGNAL";
+
+}
+
+
+/* FEATURE 2
+   AI SIGNAL OPTIMIZATION
+*/
+
+function optimizeSignal() {
+
+    const button =
+        document.getElementById("optimizeBtn");
+
+    const success =
+        document.getElementById("aiSuccess");
+
+    button.innerText = "🤖 AI ANALYZING...";
+    button.disabled = true;
+
+    success.classList.remove("show");
+
+    setTimeout(() => {
+
+        button.innerText = "✓ SIGNAL OPTIMIZED";
+
+        document.getElementById("recommended")
+            .innerText = "72s";
+
+        document.getElementById("waitingTime")
+            .innerText = "54 sec";
+
+        success.classList.add("show");
+
+        button.disabled = false;
+
+    }, 1500);
+
+}
+
+
+/* FEATURE 3
+   INCIDENT DETECTION
+*/
+
+function simulateIncident() {
+
+    const alert =
+        document.getElementById("incidentAlert");
+
+    document.getElementById("incidentLocation")
+        .innerText =
+        junctionData[selectedIndex].name;
+
+    alert.classList.add("show");
+
+    document.getElementById("incidentCount")
+        .innerText = "1";
+
+    document.getElementById("incidentStatus")
+        .innerText = "Incident requires response";
+
+    document.getElementById("incidentStatus")
+        .style.color = "#ff4d5a";
+
+}
+
+
+/* FEATURE 4
+   DISPATCH RESPONSE
+*/
+
+function dispatchResponse() {
+
+    const button =
+        document.getElementById("dispatchBtn");
+
+    button.innerText =
+        "✓ RESPONSE DISPATCHED";
+
+    button.style.background =
+        "#00a878";
+
+    document.getElementById("incidentStatus")
+        .innerText =
+        "Response team dispatched";
+
+    document.getElementById("incidentStatus")
+        .style.color =
+        "#00e5a0";
+
+}
+
+
+/* SIMULATED LIVE VEHICLE COUNT */
+
+setInterval(() => {
+
+    let current =
+        parseInt(
+            document.getElementById("totalVehicles")
+                .innerText.replace(",", "")
+        );
+
+    const change =
+        Math.floor(Math.random() * 11) - 5;
+
+    current += change;
+
+    document.getElementById("totalVehicles")
+        .innerText =
+        current.toLocaleString();
+
+}, 3000);
+
+</script>
+
+</body>
+</html>
