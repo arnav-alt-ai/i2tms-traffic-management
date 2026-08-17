@@ -4,7 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>I²TMS - Intelligent Traffic Management System</title>
-
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
 <style>
 * {
     box-sizing: border-box;
@@ -518,6 +521,12 @@ button.dark-button {
         grid-template-columns: repeat(2,1fr);
     }
 }
+#trafficMap {
+    height: 400px;
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+}
 </style>
 </head>
 
@@ -900,8 +909,20 @@ button.dark-button {
 
 </section>
 
+<!-- TRAFFIC MAP -->
+
+<section class="panel" style="margin-top:15px">
+
+    <h2>🗺️ Live Traffic Map</h2>
+
+    <div id="trafficMap"></div>
+
+</section>
+
 </main>
 </div>
+
+
 
 
 <!-- INCIDENT ALERT -->
@@ -940,7 +961,90 @@ button.dark-button {
 </div>
 
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
+
+    const trafficMap = L.map("trafficMap").setView(
+    [21.1458, 79.0882],
+    12
+);
+
+L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+        attribution: "&copy; OpenStreetMap contributors"
+    }
+).addTo(trafficMap);
+
+const junctionLocations = [
+    {
+        name: "Variety Chowk",
+        position: [21.1458, 79.0882],
+        vehicles: 184,
+        level: "HIGH"
+    },
+    {
+        name: "Sadar",
+        position: [21.1539, 79.0806],
+        vehicles: 112,
+        level: "MEDIUM"
+    },
+    {
+        name: "Wardha Road",
+        position: [21.1150, 79.0850],
+        vehicles: 45,
+        level: "LOW"
+    },
+    {
+        name: "Manish Nagar",
+        position: [21.1100, 79.0700],
+        vehicles: 67,
+        level: "LOW"
+    }
+];
+
+junctionLocations.forEach((junction, index) => {
+
+    const marker = L.marker(junction.position)
+        .addTo(trafficMap);
+
+    marker.bindPopup(`
+        <b>${junction.name}</b><br>
+        Vehicles: ${junction.vehicles}<br>
+        Traffic: <b>${junction.level}</b><br><br>
+        <button onclick="selectJunctionFromMap(${index})">
+            View Junction
+        </button>
+    `);
+
+});
+
+function selectJunctionFromMap(index) {
+
+    const junction = junctionLocations[index];
+
+    const dashboardIndex = junctionData.findIndex(
+        item => item.name === junction.name
+    );
+
+    if (dashboardIndex === -1) return;
+
+    const junctionElements =
+        document.querySelectorAll(".junction");
+
+    selectJunction(
+        dashboardIndex,
+        junctionElements[dashboardIndex]
+    );
+
+    document.getElementById("junctionName")
+        .scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+}
+
 
 const junctionData = [
 
