@@ -4,7 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>I²TMS - Intelligent Traffic Management System</title>
-
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
 <style>
 * {
     box-sizing: border-box;
@@ -518,6 +521,34 @@ button.dark-button {
         grid-template-columns: repeat(2,1fr);
     }
 }
+#trafficMap {
+    height: 400px;
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.traffic-marker-high {
+    animation: trafficPulse 1.2s infinite;
+}
+
+@keyframes trafficPulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.5);
+        opacity: 0.6;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
 </style>
 </head>
 
@@ -900,8 +931,43 @@ button.dark-button {
 
 </section>
 
+<!-- TRAFFIC MAP -->
+
+<section class="panel" style="margin-top:15px">
+
+    <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:12px;
+    ">
+
+        <h2 style="margin-bottom:0;">
+            🗺️ Live Traffic Map
+        </h2>
+
+        <div style="
+            display:flex;
+            gap:12px;
+            font-size:11px;
+            color:#858d9b;
+        ">
+            <span>🟢 LOW</span>
+            <span>🟡 MEDIUM</span>
+            <span>🔴 HIGH</span>
+            <span style="color:#00e5a0;">● LIVE</span>
+        </div>
+
+    </div>
+
+    <div id="trafficMap"></div>
+
+</section>
+
 </main>
 </div>
+
+
 
 
 <!-- INCIDENT ALERT -->
@@ -940,7 +1006,168 @@ button.dark-button {
 </div>
 
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
+
+    const trafficMap = L.map("trafficMap").setView(
+    [21.1458, 79.0882],
+    12
+);
+
+L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+        attribution: "&copy; OpenStreetMap contributors"
+    }
+).addTo(trafficMap);
+
+const junctionLocations = [
+    {
+        name: "Variety Chowk",
+        position: [21.1458, 79.0882],
+        vehicles: 184,
+        level: "HIGH"
+    },
+    {
+        name: "Sadar",
+        position: [21.1539, 79.0806],
+        vehicles: 112,
+        level: "MEDIUM"
+    },
+    {
+        name: "Wardha Road",
+        position: [21.1150, 79.0850],
+        vehicles: 45,
+        level: "LOW"
+    },
+    {
+        name: "Manish Nagar",
+        position: [21.1100, 79.0700],
+        vehicles: 67,
+        level: "LOW"
+    }
+];
+
+junctionLocations.forEach((junction, index) => {
+
+    const markerColor = {
+    HIGH: "#ff4d5a",
+    MEDIUM: "#ffc857",
+    LOW: "#00e5a0"
+}[junction.level];
+
+const markerIcon = L.divIcon({
+    className: "",
+    html: `
+    <div class="${junction.level === "HIGH" ? "traffic-marker-high" : ""}" style="
+        width:18px;
+        height:18px;
+        background:${markerColor};
+        border:3px solid white;
+        border-radius:50%;
+        box-shadow:0 0 12px ${markerColor};
+    "></div>
+`,
+    iconSize: [18, 18],
+    iconAnchor: [9, 9]
+});
+
+const marker = L.marker(
+    junction.position,
+    { icon: markerIcon }
+).addTo(trafficMap);
+junction.marker = marker;
+
+    marker.bindPopup(`
+    <div style="
+        min-width:190px;
+        font-family:Arial, Helvetica, sans-serif;
+    ">
+
+        <div style="
+            font-size:16px;
+            font-weight:bold;
+            margin-bottom:12px;
+            color:#111;
+        ">
+            ${junction.name}
+        </div>
+
+        <div style="
+            display:flex;
+            justify-content:space-between;
+            margin-bottom:8px;
+        ">
+            <span>🚗 Vehicles</span>
+            <strong>${junction.vehicles}</strong>
+        </div>
+
+        <div style="
+            display:flex;
+            justify-content:space-between;
+            margin-bottom:8px;
+        ">
+            <span>🚦 Traffic</span>
+            <strong style="color:${markerColor};">
+                ${junction.level}
+            </strong>
+        </div>
+
+        <div style="
+            font-size:11px;
+            color:#666;
+            margin-bottom:12px;
+        ">
+            AI Traffic Monitoring Active
+        </div>
+
+        <button
+            onclick="selectJunctionFromMap(${index})"
+            style="
+                width:100%;
+                padding:9px;
+                border:none;
+                border-radius:6px;
+                background:#1769e0;
+                color:white;
+                font-weight:bold;
+                cursor:pointer;
+            "
+        >
+            VIEW JUNCTION
+        </button>
+
+    </div>
+`);
+
+});
+
+function selectJunctionFromMap(index) {
+
+    const junction = junctionLocations[index];
+
+    const dashboardIndex = junctionData.findIndex(
+        item => item.name === junction.name
+    );
+
+    if (dashboardIndex === -1) return;
+
+    const junctionElements =
+        document.querySelectorAll(".junction");
+
+    selectJunction(
+        dashboardIndex,
+        junctionElements[dashboardIndex]
+    );
+
+    document.getElementById("junctionName")
+        .scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+}
+
 
 const junctionData = [
 
@@ -981,6 +1208,85 @@ const junctionData = [
     }
 
 ];
+
+function updateTrafficMarkers() {
+
+    junctionLocations.forEach((location, index) => {
+
+        const data = junctionData[index];
+
+        if (!data || !location.marker) return;
+
+        let level;
+
+        if (data.vehicles >= 150) {
+            level = "HIGH";
+        } else if (data.vehicles >= 80) {
+            level = "MEDIUM";
+        } else {
+            level = "LOW";
+        }
+
+        location.vehicles = data.vehicles;
+        location.level = level;
+
+        const junctionCards =
+    document.querySelectorAll(".junction");
+
+const card = junctionCards[index];
+
+if (card) {
+
+    const vehicleText =
+        card.querySelector(".junction-info span");
+
+    if (vehicleText) {
+        vehicleText.innerText =
+            data.vehicles + " vehicles";
+    }
+
+    const badge =
+        card.querySelector(".badge");
+
+    if (badge) {
+
+        badge.innerText = level;
+
+        badge.className =
+            "badge " + level.toLowerCase();
+
+    }
+
+}
+
+        const markerColor = {
+            HIGH: "#ff4d5a",
+            MEDIUM: "#ffc857",
+            LOW: "#00e5a0"
+        }[level];
+
+        const markerIcon = L.divIcon({
+            className: "",
+            html: `
+                <div class="${level === "HIGH" ? "traffic-marker-high" : ""}" style="
+                    width:18px;
+                    height:18px;
+                    background:${markerColor};
+                    border:3px solid white;
+                    border-radius:50%;
+                    box-shadow:0 0 12px ${markerColor};
+                "></div>
+            `,
+            iconSize: [18, 18],
+            iconAnchor: [9, 9]
+        });
+
+        location.marker.setIcon(markerIcon);
+
+    });
+
+}
+setInterval(updateTrafficMarkers, 3000);
 
 let selectedIndex = 0;
 
@@ -1122,20 +1428,28 @@ function dispatchResponse() {
 
 setInterval(() => {
 
-    let current =
-        parseInt(
-            document.getElementById("totalVehicles")
-                .innerText.replace(",", "")
-        );
+    let total = 0;
 
-    const change =
-        Math.floor(Math.random() * 11) - 5;
+    junctionData.forEach((junction, index) => {
 
-    current += change;
+        const change =
+            Math.floor(Math.random() * 11) - 5;
+
+        junction.vehicles += change;
+
+        // Keep values realistic
+        if (junction.vehicles < 10) {
+            junction.vehicles = 10;
+        }
+
+        total += junction.vehicles;
+
+    });
 
     document.getElementById("totalVehicles")
-        .innerText =
-        current.toLocaleString();
+        .innerText = total.toLocaleString();
+
+    updateTrafficMarkers();
 
 }, 3000);
 
