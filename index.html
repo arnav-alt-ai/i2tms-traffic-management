@@ -527,6 +527,28 @@ button.dark-button {
     border-radius: 10px;
     overflow: hidden;
 }
+
+.traffic-marker-high {
+    animation: trafficPulse 1.2s infinite;
+}
+
+@keyframes trafficPulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.5);
+        opacity: 0.6;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
 </style>
 </head>
 
@@ -1006,8 +1028,32 @@ const junctionLocations = [
 
 junctionLocations.forEach((junction, index) => {
 
-    const marker = L.marker(junction.position)
-        .addTo(trafficMap);
+    const markerColor = {
+    HIGH: "#ff4d5a",
+    MEDIUM: "#ffc857",
+    LOW: "#00e5a0"
+}[junction.level];
+
+const markerIcon = L.divIcon({
+    className: "",
+    html: `
+    <div class="${junction.level === "HIGH" ? "traffic-marker-high" : ""}" style="
+        width:18px;
+        height:18px;
+        background:${markerColor};
+        border:3px solid white;
+        border-radius:50%;
+        box-shadow:0 0 12px ${markerColor};
+    "></div>
+`,
+    iconSize: [18, 18],
+    iconAnchor: [9, 9]
+});
+
+const marker = L.marker(
+    junction.position,
+    { icon: markerIcon }
+).addTo(trafficMap);
 
     marker.bindPopup(`
         <b>${junction.name}</b><br>
