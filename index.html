@@ -1054,6 +1054,7 @@ const marker = L.marker(
     junction.position,
     { icon: markerIcon }
 ).addTo(trafficMap);
+junction.marker = marker;
 
     marker.bindPopup(`
         <b>${junction.name}</b><br>
@@ -1131,6 +1132,85 @@ const junctionData = [
     }
 
 ];
+
+function updateTrafficMarkers() {
+
+    junctionLocations.forEach((location, index) => {
+
+        const data = junctionData[index];
+
+        if (!data || !location.marker) return;
+
+        let level;
+
+        if (data.vehicles >= 150) {
+            level = "HIGH";
+        } else if (data.vehicles >= 80) {
+            level = "MEDIUM";
+        } else {
+            level = "LOW";
+        }
+
+        location.vehicles = data.vehicles;
+        location.level = level;
+
+        const junctionCards =
+    document.querySelectorAll(".junction");
+
+const card = junctionCards[index];
+
+if (card) {
+
+    const vehicleText =
+        card.querySelector(".junction-info span");
+
+    if (vehicleText) {
+        vehicleText.innerText =
+            data.vehicles + " vehicles";
+    }
+
+    const badge =
+        card.querySelector(".badge");
+
+    if (badge) {
+
+        badge.innerText = level;
+
+        badge.className =
+            "badge " + level.toLowerCase();
+
+    }
+
+}
+
+        const markerColor = {
+            HIGH: "#ff4d5a",
+            MEDIUM: "#ffc857",
+            LOW: "#00e5a0"
+        }[level];
+
+        const markerIcon = L.divIcon({
+            className: "",
+            html: `
+                <div class="${level === "HIGH" ? "traffic-marker-high" : ""}" style="
+                    width:18px;
+                    height:18px;
+                    background:${markerColor};
+                    border:3px solid white;
+                    border-radius:50%;
+                    box-shadow:0 0 12px ${markerColor};
+                "></div>
+            `,
+            iconSize: [18, 18],
+            iconAnchor: [9, 9]
+        });
+
+        location.marker.setIcon(markerIcon);
+
+    });
+
+}
+setInterval(updateTrafficMarkers, 3000);
 
 let selectedIndex = 0;
 
@@ -1272,20 +1352,28 @@ function dispatchResponse() {
 
 setInterval(() => {
 
-    let current =
-        parseInt(
-            document.getElementById("totalVehicles")
-                .innerText.replace(",", "")
-        );
+    let total = 0;
 
-    const change =
-        Math.floor(Math.random() * 11) - 5;
+    junctionData.forEach((junction, index) => {
 
-    current += change;
+        const change =
+            Math.floor(Math.random() * 11) - 5;
+
+        junction.vehicles += change;
+
+        // Keep values realistic
+        if (junction.vehicles < 10) {
+            junction.vehicles = 10;
+        }
+
+        total += junction.vehicles;
+
+    });
 
     document.getElementById("totalVehicles")
-        .innerText =
-        current.toLocaleString();
+        .innerText = total.toLocaleString();
+
+    updateTrafficMarkers();
 
 }, 3000);
 
